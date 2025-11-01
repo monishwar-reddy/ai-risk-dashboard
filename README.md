@@ -26,8 +26,10 @@ It uses **Flask** and **Google Cloud Run**, with AI-powered logic through **Goog
 
 ### 1️⃣ Clone the Repository  
 Run the following commands in your terminal:  
-git clone https://github.com/<your-username>/ai-environment-dashboard.git  
-cd ai-environment-dashboard  
+
+--git clone https://github.com/<your-username>/ai-environment-dashboard.git  
+
+--cd ai-environment-dashboard  
 
 ### 2️⃣ Install Dependencies  
 Use pip to install the required packages:  
