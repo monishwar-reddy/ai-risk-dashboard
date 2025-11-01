@@ -4,7 +4,8 @@ AI Environment Dashboard is a smart, serverless web app that visualizes **real-t
 It uses **Flask** and **Google Cloud Run**, with AI-powered logic through **Google AI Studio (Gemini API)**.
 
 ---
-
+**Try:**
+https://ai-risk-dashboard-192565971483.asia-south1.run.app/
 ## 🧠 Features
 - Displays **real-time weather and environmental conditions**
 - Integrates **public APIs** like OpenWeatherMap and USGS Earthquake API
