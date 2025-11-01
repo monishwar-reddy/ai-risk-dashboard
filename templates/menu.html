@@ -1,0 +1,189 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Platform Portal — AI Disaster Response</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css" />
+  <style>
+    .portal-container {
+      min-height: 85vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      background: radial-gradient(ellipse at center, rgba(255, 59, 59, 0.05) 0%, transparent 70%);
+    }
+    
+    .portal-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 2rem;
+      max-width: 800px;
+      width: 100%;
+    }
+    
+    .portal-card {
+      background: var(--gradient-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 2.5rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.4s ease;
+      position: relative;
+      overflow: hidden;
+      min-height: 280px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    
+    .portal-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, rgba(255, 59, 59, 0.1), transparent);
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+    
+    .portal-card:hover::before {
+      opacity: 1;
+    }
+    
+    .portal-card:hover {
+      transform: translateY(-8px) scale(1.02);
+      border-color: var(--primary-red);
+      box-shadow: 0 20px 60px rgba(255, 59, 59, 0.2);
+    }
+    
+    .portal-icon {
+      font-size: 4rem;
+      margin-bottom: 1.5rem;
+      display: block;
+      position: relative;
+      z-index: 2;
+    }
+    
+    .portal-title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      color: var(--text-primary);
+      position: relative;
+      z-index: 2;
+    }
+    
+    .portal-desc {
+      color: var(--text-secondary);
+      line-height: 1.6;
+      font-size: 1rem;
+      position: relative;
+      z-index: 2;
+    }
+    
+
+    
+    .portal-header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+    
+    .portal-header h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      background: linear-gradient(135deg, #ffffff, #ff6b6b);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .portal-header p {
+      color: var(--text-secondary);
+      font-size: 1.1rem;
+    }
+    
+    @media (max-width: 768px) {
+      .portal-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+      }
+      
+      .portal-card {
+        padding: 2rem;
+        min-height: 250px;
+      }
+      
+      .portal-container {
+        padding: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="logo">🌋 AI Disaster Response</div>
+    <nav class="nav-links">
+      <a class="nav-link" href="/">Home</a>
+      <a class="nav-link" href="/contact">Contact</a>
+      <button id="themeToggle" class="theme-toggle" title="Toggle Theme">
+        <span class="theme-icon">🌙</span>
+      </button>
+    </nav>
+  </header>
+
+  <div class="portal-container">
+    <div style="width: 100%; max-width: 1000px;">
+      <div class="portal-header fade-in-up">
+        <h1>Platform Portal</h1>
+        <p>Choose your tool to begin disaster risk analysis</p>
+      </div>
+
+      <div class="portal-grid">
+        <div onclick="location.href='/dashboard'" class="portal-card fade-in-up">
+          <span class="portal-icon">🗺️</span>
+          <h2 class="portal-title">Risk Analysis Dashboard</h2>
+          <p class="portal-desc">Interactive mapping platform with real-time environmental monitoring and AI-powered risk assessment.</p>
+
+        </div>
+
+        <div onclick="location.href='/chat'" class="portal-card fade-in-up">
+          <span class="portal-icon">🤖</span>
+          <h2 class="portal-title">AI Assistant Chat</h2>
+          <p class="portal-desc">Intelligent conversational AI for disaster preparedness guidance and personalized safety recommendations.</p>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function initThemeToggle() {
+      const themeToggle = document.getElementById('themeToggle');
+      const themeIcon = themeToggle.querySelector('.theme-icon');
+      
+      // Check for saved theme or default to dark
+      const currentTheme = localStorage.getItem('theme') || 'dark';
+      document.documentElement.setAttribute('data-theme', currentTheme);
+      themeIcon.textContent = currentTheme === 'dark' ? '🌙' : '☀️';
+      
+      themeToggle.addEventListener('click', () => {
+        const currentTheme = document.documentElement.getAttribute('data-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        
+        document.documentElement.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+        themeIcon.textContent = newTheme === 'dark' ? '🌙' : '☀️';
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', initThemeToggle);
+  </script>
+</body>
+</html>
