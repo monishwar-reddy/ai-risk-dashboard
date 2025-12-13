@@ -52,13 +52,14 @@ Instead of raw numbers, users receive AI-driven explanations that make environme
 2. Environmental data is fetched in real-time from public APIs  
 3. Data is sent to Gemini AI for contextual analysis  
 4. AI generates actionable insights  
-5. Results are displayed via an interactive web dashboard  
+5. Results are displayed via an interactive web dashboard
+
 ![Uploading Blank diagram - Page 1 (1).png…]()
 
 ---
 
 ## ⚙️ Setup Instructions
-1️⃣ **Clone the Repository**  
+### 1️⃣ Clone the Repository  
 ```bash
 git clone https://github.com/<your-username>/ai-environment-dashboard.git
 cd ai-environment-dashboard
