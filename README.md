@@ -60,59 +60,63 @@ Instead of raw numbers, users receive AI-driven explanations that make environme
 ---
 
 ## ⚙️ Setup Instructions
-
-##1️⃣ Clone the Repository  
-
+1️⃣ **Clone the Repository**  
 ```bash
 git clone https://github.com/<your-username>/ai-environment-dashboard.git
 cd ai-environment-dashboard
+2️⃣ Install Dependencies
 
-### 2️⃣ Install Dependencies  
-Use pip to install the required packages:  
-pip install -r requirements.txt  
+bash
+Copy code
+pip install -r requirements.txt
+3️⃣ Run Locally
 
-### 3️⃣ Run Locally  
-Start the Flask server with:  
-python app.py  
+bash
+Copy code
+python app.py
+Visit http://127.0.0.1:5000
 
-Visit **http://127.0.0.1:5000** in your browser or as shown in your terminal output.
+🌐 Deploying to Google Cloud Run
+Go to Google Cloud Console → Cloud Run
 
----
+Connect this GitHub repository
 
-## 🌐 Deploying to Google Cloud Run  
+Set Environment Variables for your API keys
 
-1. Go to **Google Cloud Console → Cloud Run**  
-2. Connect this **GitHub repository**  
-3. Set **Environment Variables** for your API keys  
-4. Deploy the app — you’ll get a public URL like:  
-   https://ai-dashboard-xxxx.a.run.app  
+Deploy the app — you’ll get a public URL like:
+https://ai-dashboard-xxxx.a.run.app
 
----
+🔐 API Keys & Security
+⚠️ Important Notice:
+The API keys included in this repository are sample placeholders only.
+Replace them with your own valid keys before deployment.
+Use a .env file (added to .gitignore) or Cloud Run environment variables instead.
 
-## 🔐 API Keys & Security  
+Example .env file:
 
-⚠️ **Important Notice:**  
-The API keys included in this repository are sample placeholders only.  
-Replace them with your own valid keys before deployment.  
-Use `.env` files (added to `.gitignore`) or Cloud Run environment variables instead.  
+env
+Copy code
+OPENWEATHERMAP_API_KEY=your_real_key_here
+AI_STUDIO_API_KEY=your_real_key_here
+🌍 Impact
+Enables international travelers to assess environmental safety
 
-**Example `.env` file:**  
-OPENWEATHERMAP_API_KEY=your_real_key_here  
-AI_STUDIO_API_KEY=your_real_key_here  
+Helps remote teams choose safer work locations
 
----
+Assists organizations operating across borders
 
-## 📜 License  
-This project is open-source and created for educational and hackathon purposes only.  
-Licensed under the **MIT License**.
+Reduces barriers to global mobility by providing actionable AI insights
 
----
+🚀 Future Scope
+Multilingual AI insights
 
-## ✨ Author  
-**Vardireddy Monishwar Reddy**  
-📧 monishwar26413@gmail.com  
+Disaster alerts for cross-border travel
 
----
+Integration with relocation, travel, and safety platforms
 
-## 🤝 Contributions  
+📧 Author
+Vardireddy Monishwar Reddy
+monishwar26413@gmail.com
+
+🤝 Contributions
 Feel free to contribute via pull requests or by emailing suggestions and improvements.
