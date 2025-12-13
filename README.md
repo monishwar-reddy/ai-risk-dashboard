@@ -64,25 +64,21 @@ Instead of raw numbers, users receive AI-driven explanations that make environme
 ```bash
 git clone https://github.com/<your-username>/ai-environment-dashboard.git
 cd ai-environment-dashboard
-2️⃣ Install Dependencies
-
-bash
-Copy code
+2️⃣ **Install Dependencies**  
+```bash
 pip install -r requirements.txt
+
 3️⃣ Run Locally
 
-bash
-Copy code
 python app.py
-Visit http://127.0.0.1:5000
 
-🌐 Deploying to Google Cloud Run
+
+Visit: http://127.0.0.1:5000
+---
+## 🌐 Deploying to Google Cloud Run
 Go to Google Cloud Console → Cloud Run
-
 Connect this GitHub repository
-
 Set Environment Variables for your API keys
-
 Deploy the app — you’ll get a public URL like:
 https://ai-dashboard-xxxx.a.run.app
 
@@ -94,11 +90,12 @@ Use a .env file (added to .gitignore) or Cloud Run environment variables instead
 
 Example .env file:
 
-env
-Copy code
 OPENWEATHERMAP_API_KEY=your_real_key_here
 AI_STUDIO_API_KEY=your_real_key_here
+
+
 🌍 Impact
+
 Enables international travelers to assess environmental safety
 
 Helps remote teams choose safer work locations
@@ -108,6 +105,7 @@ Assists organizations operating across borders
 Reduces barriers to global mobility by providing actionable AI insights
 
 🚀 Future Scope
+
 Multilingual AI insights
 
 Disaster alerts for cross-border travel
