@@ -59,20 +59,21 @@ Instead of raw numbers, users receive AI-driven explanations that make environme
 
 ---
 
-##⚙️ Setup Instructions
-1️⃣ Clone the Repository  
+## ⚙️ Setup Instructions
+1️⃣ **Clone the Repository** 
 ```bash
 git clone https://github.com/<your-username>/ai-environment-dashboard.git
 cd ai-environment-dashboard
-2️⃣ Install Dependencies 
+2️⃣ **Install Dependencies** 
 ```bash
 pip install -r requirements.txt
 
-3️⃣ Run Locally
+3️⃣ **Run Locally**
 
 python app.py
 
 Visit: http://127.0.0.1:5000
+
 
 ---
 
@@ -114,6 +115,5 @@ monishwar26413@gmail.com
 🤝 Contributions
 Feel free to contribute via pull requests or by emailing suggestions and improvements.
 
-pgsql
-Copy code
+
 
