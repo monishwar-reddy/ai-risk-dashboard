@@ -61,7 +61,8 @@ Instead of raw numbers, users receive AI-driven explanations that make environme
 
 ## ⚙️ Setup Instructions
 
-###1️⃣ Clone the Repository  
+##1️⃣ Clone the Repository  
+
 ```bash
 git clone https://github.com/<your-username>/ai-environment-dashboard.git
 cd ai-environment-dashboard
