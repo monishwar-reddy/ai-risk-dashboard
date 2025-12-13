@@ -54,12 +54,14 @@ Instead of raw numbers, users receive AI-driven explanations that make environme
 4. AI generates actionable insights  
 5. Results are displayed via an interactive web dashboard
 
-![Uploading Blank diagram - Page 1 (1).png…]()
+<img width="7163" height="5588" alt="Architecture Diagram (2) (1)" src="https://github.com/user-attachments/assets/5ab3d38f-d2a5-49a1-b4e2-d9b63b69a49c" />
+
 
 ---
 
 ## ⚙️ Setup Instructions
-### 1️⃣ Clone the Repository  
+
+###1️⃣ Clone the Repository  
 ```bash
 git clone https://github.com/<your-username>/ai-environment-dashboard.git
 cd ai-environment-dashboard
