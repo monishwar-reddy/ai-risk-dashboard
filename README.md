@@ -7,13 +7,6 @@ The platform aggregates real-time environmental data and uses **Gemini AI** to d
 
 🔗 **Live Demo:** [Click Here](https://ai-risk-dashboard-192565971483.asia-south1.run.app/)
 
----
-
-## 🎯 Theme Alignment
-**Primary Theme:** Global Mobility  
-**Secondary Theme:** International Collaboration  
-
-This project aligns with the VisaVerse AI Hackathon by using AI to reduce environmental and safety barriers that affect **global movement, international travel, and cross-border collaboration**.
 
 ---
 
