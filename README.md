@@ -59,12 +59,12 @@ Instead of raw numbers, users receive AI-driven explanations that make environme
 
 ---
 
-## ⚙️ Setup Instructions
-1️⃣ **Clone the Repository**  
+##⚙️ Setup Instructions
+1️⃣ Clone the Repository  
 ```bash
 git clone https://github.com/<your-username>/ai-environment-dashboard.git
 cd ai-environment-dashboard
-2️⃣ **Install Dependencies**  
+2️⃣ Install Dependencies 
 ```bash
 pip install -r requirements.txt
 
@@ -72,28 +72,23 @@ pip install -r requirements.txt
 
 python app.py
 
-
 Visit: http://127.0.0.1:5000
+
 ---
+
 ## 🌐 Deploying to Google Cloud Run
-Go to Google Cloud Console → Cloud Run
-Connect this GitHub repository
-Set Environment Variables for your API keys
-Deploy the app — you’ll get a public URL like:
-https://ai-dashboard-xxxx.a.run.app
+Go to Google Cloud Console → Cloud Run  
+Connect this GitHub repository  
+Set Environment Variables for your API keys  
+Deploy the app — you’ll get a public URL like: `https://ai-dashboard-xxxx.a.run.app`
 
-🔐 API Keys & Security
-⚠️ Important Notice:
-The API keys included in this repository are sample placeholders only.
-Replace them with your own valid keys before deployment.
-Use a .env file (added to .gitignore) or Cloud Run environment variables instead.
+🔐 API Keys & Security  
+⚠️ Important Notice: The API keys included in this repository are sample placeholders only. Replace them with your own valid keys before deployment. Use a `.env` file (added to `.gitignore`) or Cloud Run environment variables instead.
 
-Example .env file:
-
+**Example `.env` file:**  
+```env
 OPENWEATHERMAP_API_KEY=your_real_key_here
 AI_STUDIO_API_KEY=your_real_key_here
-
-
 🌍 Impact
 
 Enables international travelers to assess environmental safety
@@ -118,3 +113,7 @@ monishwar26413@gmail.com
 
 🤝 Contributions
 Feel free to contribute via pull requests or by emailing suggestions and improvements.
+
+pgsql
+Copy code
+
