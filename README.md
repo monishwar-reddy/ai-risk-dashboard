@@ -1,36 +1,67 @@
 # 🌍 AI Environment Dashboard
+**AI-Powered Global Environmental Intelligence for Mobility & Safety**
 
-AI Environment Dashboard is a smart, serverless web app that visualizes **real-time environmental data** such as temperature, humidity, and air quality.  
-It uses **Flask** and **Google Cloud Run**, with AI-powered logic through **Google AI Studio (Gemini API)**.
+AI Environment Dashboard is a smart, serverless web application that provides **real-time environmental risk intelligence** to support **global mobility, international travel, and cross-border decision-making**.
 
----
-**Try:**
-https://ai-risk-dashboard-192565971483.asia-south1.run.app/
-## 🧠 Features
-- Displays **real-time weather and environmental conditions**
-- Integrates **public APIs** like OpenWeatherMap and USGS Earthquake API
-- Provides **AI-based contextual insights** using Google AI Studio
-- Deployed seamlessly on **Google Cloud Run**
+The platform aggregates real-time environmental data and uses **Gemini AI** to deliver **contextual insights** that help travelers, remote workers, international teams, and organizations make safer location-based decisions worldwide.
+
+🔗 **Live Demo:** [Click Here](https://ai-risk-dashboard-192565971483.asia-south1.run.app/)
 
 ---
 
-## 🧩 Technologies Used
-- **Frontend:** HTML, CSS, JavaScript  
+## 🎯 Theme Alignment
+**Primary Theme:** Global Mobility  
+**Secondary Theme:** International Collaboration  
+
+This project aligns with the VisaVerse AI Hackathon by using AI to reduce environmental and safety barriers that affect **global movement, international travel, and cross-border collaboration**.
+
+---
+
+## 🧩 Problem Statement
+People traveling, relocating, or collaborating across countries often lack **real-time environmental awareness** such as air quality, extreme weather, or seismic activity.  
+This gap can impact **travel safety, productivity, and decision-making**, especially for international teams and mobile workers.
+
+---
+
+## 💡 Solution Overview
+AI Environment Dashboard collects real-time environmental data from global sources and leverages **Gemini AI** to generate **human-readable, actionable insights**.  
+Instead of raw numbers, users receive AI-driven explanations that make environmental risks easy to understand and respond to, anywhere in the world.
+
+---
+
+## 🧠 Key Features
+- 🌍 Real-time global environmental monitoring  
+- 🌡️ Weather, air quality, and seismic activity visualization  
+- 🤖 Gemini AI-powered contextual insights  
+- ☁️ Fully serverless & globally accessible  
+- 🧭 Supports decision-making for travelers & international teams  
+
+---
+
+## 🛠️ Technologies Used
+- **AI Layer:** Google AI Studio (Gemini Prompt API) – Generates contextual risk insights  
 - **Backend:** Python (Flask)  
+- **Frontend:** HTML, CSS, JavaScript  
 - **APIs:** OpenWeatherMap API, USGS Earthquake API  
-- **AI Layer:** Google AI Studio (Gemini Prompt API)  
-- **Hosting:** Google Cloud Run  
+- **Hosting:** Google Cloud Run (serverless deployment)
+
+---
+
+## 🏗️ Architecture / Workflow
+1. User selects a location or views global data  
+2. Environmental data is fetched in real-time from public APIs  
+3. Data is sent to Gemini AI for contextual analysis  
+4. AI generates actionable insights  
+5. Results are displayed via an interactive web dashboard  
+![Uploading Blank diagram - Page 1 (1).png…]()
 
 ---
 
 ## ⚙️ Setup Instructions
-
-### 1️⃣ Clone the Repository  
-Run the following commands in your terminal:  
-
---git clone https://github.com/<your-username>/ai-environment-dashboard.git  
-
---cd ai-environment-dashboard  
+1️⃣ **Clone the Repository**  
+```bash
+git clone https://github.com/<your-username>/ai-environment-dashboard.git
+cd ai-environment-dashboard
 
 ### 2️⃣ Install Dependencies  
 Use pip to install the required packages:  
