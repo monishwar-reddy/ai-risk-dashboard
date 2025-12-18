@@ -1,0 +1,619 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>AI Assistant Chat — Disaster Response Platform</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    .chat-container {
+      max-width: 1000px;
+      margin: 2rem auto;
+      padding: 0 2rem;
+      height: calc(100vh - 200px);
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .chat-header {
+      background: var(--gradient-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px 12px 0 0;
+      padding: 1.5rem;
+      text-align: center;
+    }
+    
+    .chat-header h1 {
+      margin: 0 0 0.5rem 0;
+      font-size: 1.8rem;
+      color: var(--text-primary);
+    }
+    
+    .chat-header p {
+      margin: 0;
+      color: var(--text-secondary);
+    }
+    
+    .chat-messages {
+      flex: 1;
+      background: var(--bg-panel);
+      border-left: 1px solid var(--border-color);
+      border-right: 1px solid var(--border-color);
+      padding: 1.5rem;
+      overflow-y: auto;
+      min-height: 400px;
+      max-height: 500px;
+    }
+    
+    .message {
+      margin-bottom: 1.5rem;
+      animation: fadeInUp 0.3s ease-out;
+    }
+    
+    .message-user {
+      text-align: right;
+    }
+    
+    .message-ai {
+      text-align: left;
+    }
+    
+    .message-content {
+      display: inline-block;
+      max-width: 80%;
+      padding: 1rem 1.5rem;
+      border-radius: 12px;
+      position: relative;
+    }
+    
+    .message-user .message-content {
+      background: var(--gradient-primary);
+      color: white;
+      border-bottom-right-radius: 4px;
+    }
+    
+    .message-ai .message-content {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      border-bottom-left-radius: 4px;
+    }
+    
+    .message-sender {
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      opacity: 0.8;
+    }
+    
+    .message-text {
+      line-height: 1.6;
+      word-wrap: break-word;
+    }
+    
+    .message-text p {
+      margin: 0 0 0.5rem 0;
+    }
+    
+    .message-text p:last-child {
+      margin-bottom: 0;
+    }
+    
+    .chat-input-container {
+      background: var(--gradient-card);
+      border: 1px solid var(--border-color);
+      border-radius: 0 0 12px 12px;
+      padding: 1.5rem;
+      border-top: none;
+    }
+    
+    .chat-input-group {
+      display: flex;
+      gap: 1rem;
+      align-items: flex-end;
+    }
+    
+    .chat-input {
+      flex: 1;
+      min-height: 50px;
+      resize: vertical;
+      font-family: inherit;
+    }
+    
+    .chat-send-btn {
+      min-width: 100px;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+    
+    .typing-indicator {
+      display: none;
+      text-align: left;
+      margin-bottom: 1rem;
+    }
+    
+    .typing-indicator .message-content {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      padding: 1rem 1.5rem;
+    }
+    
+    .typing-dots {
+      display: inline-flex;
+      gap: 4px;
+    }
+    
+    .typing-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--primary-red);
+      animation: typingDot 1.4s infinite ease-in-out;
+    }
+    
+    .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+    .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+    
+    @keyframes typingDot {
+      0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
+      40% { opacity: 1; transform: scale(1); }
+    }
+    
+    .welcome-message {
+      text-align: center;
+      color: var(--text-muted);
+      padding: 2rem;
+      font-style: italic;
+    }
+    
+    .quick-questions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+    
+    .quick-question {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .quick-question:hover {
+      background: var(--primary-red);
+      color: white;
+      border-color: var(--primary-red);
+    }
+    
+    @media (max-width: 768px) {
+      .chat-container {
+        padding: 0 1rem;
+        margin: 1rem auto;
+      }
+      
+      .message-content {
+        max-width: 90%;
+      }
+      
+      .chat-input-group {
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+      
+      .chat-send-btn {
+        width: 100%;
+      }
+    }
+
+    .action-btn {
+        background: var(--primary-red);
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        margin: 0 0.5rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 0.9rem;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .action-btn:hover {
+        background: #ff3030;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(255, 59, 59, 0.3);
+    }
+    
+    .chat-actions {
+      background: var(--gradient-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-top: 1rem;
+    }
+    
+    @media (max-width: 768px) {
+      .action-btn {
+        margin: 0.25rem;
+        padding: 0.6rem 1rem;
+        font-size: 0.8rem;
+      }
+      
+      .chat-actions {
+        padding: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="logo">🌋 AI Disaster Response</div>
+    <nav class="nav-links">
+      <a class="nav-link" href="/menu">Portal</a>
+      <a class="nav-link" href="/dashboard">Dashboard</a>
+      <a class="nav-link" href="/">Home</a>
+      <button id="themeToggle" class="theme-toggle" title="Toggle Theme">
+        <span class="theme-icon">🌙</span>
+      </button>
+    </nav>
+  </header>
+
+  <div class="chat-container">
+    <div class="chat-header">
+      <h1>🤖 AI Disaster Assistant</h1>
+      <p>Get expert guidance on disaster preparedness, risk assessment, and emergency planning</p>
+    </div>
+
+    <div class="chat-messages" id="chatMessages">
+      <div class="welcome-message">
+        <h3>👋 Welcome to AI Disaster Assistant</h3>
+        <p>I'm here to help you with disaster preparedness, risk assessment, and emergency planning. Ask me anything!</p>
+        
+        <div class="quick-questions">
+          <div class="quick-question" onclick="sendQuickQuestion('What should I do during an earthquake?')">
+            What should I do during an earthquake?
+          </div>
+          <div class="quick-question" onclick="sendQuickQuestion('How to prepare for a hurricane?')">
+            How to prepare for a hurricane?
+          </div>
+          <div class="quick-question" onclick="sendQuickQuestion('What are the signs of a flood risk?')">
+            What are the signs of a flood risk?
+          </div>
+          <div class="quick-question" onclick="sendQuickQuestion('Emergency kit essentials?')">
+            Emergency kit essentials?
+          </div>
+        </div>
+      </div>
+      
+      <div class="typing-indicator" id="typingIndicator">
+        <div class="message-content">
+          <div class="typing-dots">
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="chat-input-container">
+      <div class="chat-input-group">
+        <textarea 
+          id="chatInput" 
+          class="form-input chat-input" 
+          placeholder="Ask me about disaster preparedness, emergency planning, risk assessment..."
+          rows="2"
+        ></textarea>
+        <button id="sendBtn" class="btn chat-send-btn">
+          <span>Send</span>
+          <span>📤</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Chat Action Buttons -->
+    <div class="chat-actions" style="text-align: center; margin-top: 1.5rem; padding: 1rem;">
+      <button onclick="downloadChatPDF()" class="action-btn">📄 Download PDF</button>
+    </div>
+  </div>
+
+  <script>
+    let isTyping = false;
+
+    function addMessage(content, isUser = false) {
+      const messagesContainer = document.getElementById('chatMessages');
+      const welcomeMessage = messagesContainer.querySelector('.welcome-message');
+      
+      // Remove welcome message after first interaction
+      if (welcomeMessage && isUser) {
+        welcomeMessage.style.display = 'none';
+      }
+
+      const messageDiv = document.createElement('div');
+      messageDiv.className = `message ${isUser ? 'message-user' : 'message-ai'}`;
+      
+      // Clean the content - remove all markdown symbols and format like ChatGPT
+      let cleanContent = content;
+      if (!isUser) {
+        cleanContent = cleanContent
+          // Remove all asterisks and markdown formatting
+          .replace(/\*\*\*(.*?)\*\*\*/g, '$1') // Remove triple asterisks
+          .replace(/\*\*(.*?)\*\*/g, '$1') // Remove double asterisks (bold)
+          .replace(/\*(.*?)\*/g, '$1') // Remove single asterisks (italic)
+          .replace(/#{1,6}\s/g, '') // Remove markdown headers
+          .replace(/`{1,3}(.*?)`{1,3}/g, '$1') // Remove code blocks
+          .replace(/\[(.*?)\]\(.*?\)/g, '$1') // Remove markdown links
+          .replace(/^\s*[-*+]\s/gm, '') // Remove bullet points
+          .replace(/^\s*\d+\.\s/gm, '') // Remove numbered lists
+          .replace(/\n{3,}/g, '\n\n') // Reduce multiple line breaks
+          .replace(/\n\n/g, '</p><p>') // Convert double line breaks to paragraphs
+          .replace(/\n/g, '<br>') // Convert single line breaks to <br>
+          .trim();
+        
+        // Wrap in paragraph tags if not already wrapped
+        if (!cleanContent.startsWith('<p>')) {
+          cleanContent = '<p>' + cleanContent + '</p>';
+        }
+        
+        // Clean up empty paragraphs
+        cleanContent = cleanContent.replace(/<p><\/p>/g, '');
+      }
+      
+      messageDiv.innerHTML = `
+        <div class="message-sender">${isUser ? 'You' : 'AI Assistant'}</div>
+        <div class="message-content">
+          <div class="message-text">${cleanContent}</div>
+        </div>
+      `;
+      
+      messagesContainer.appendChild(messageDiv);
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      
+      return messageDiv;
+    }
+
+    function showTypingIndicator() {
+      const indicator = document.getElementById('typingIndicator');
+      indicator.style.display = 'block';
+      const messagesContainer = document.getElementById('chatMessages');
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      isTyping = true;
+    }
+
+    function hideTypingIndicator() {
+      const indicator = document.getElementById('typingIndicator');
+      indicator.style.display = 'none';
+      isTyping = false;
+    }
+
+    async function sendMessage(message) {
+      if (!message.trim() || isTyping) return;
+
+      // Add user message
+      addMessage(message, true);
+      
+      // Clear input
+      document.getElementById('chatInput').value = '';
+      
+      // Show typing indicator
+      showTypingIndicator();
+
+      try {
+        const response = await fetch('/api/chat', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({message: message})
+        });
+
+        const data = await response.json();
+        
+        // Hide typing indicator
+        hideTypingIndicator();
+        
+        // Add AI response
+        addMessage(data.reply || 'Sorry, I couldn\'t process your request. Please try again.');
+        
+      } catch (error) {
+        console.error('Chat error:', error);
+        hideTypingIndicator();
+        addMessage('Sorry, there was an error connecting to the AI. Please try again.');
+      }
+    }
+
+    function sendQuickQuestion(question) {
+      sendMessage(question);
+    }
+
+    // Event listeners
+    document.getElementById('sendBtn').addEventListener('click', () => {
+      const input = document.getElementById('chatInput');
+      sendMessage(input.value);
+    });
+
+    document.getElementById('chatInput').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        const input = document.getElementById('chatInput');
+        sendMessage(input.value);
+      }
+    });
+
+    // Auto-resize textarea
+    document.getElementById('chatInput').addEventListener('input', function() {
+      this.style.height = 'auto';
+      this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+    });
+
+    // Theme toggle functionality
+    function initThemeToggle() {
+      const themeToggle = document.getElementById('themeToggle');
+      const themeIcon = themeToggle.querySelector('.theme-icon');
+      
+      // Check for saved theme or default to dark
+      const currentTheme = localStorage.getItem('theme') || 'dark';
+      document.documentElement.setAttribute('data-theme', currentTheme);
+      themeIcon.textContent = currentTheme === 'dark' ? '🌙' : '☀️';
+      
+      themeToggle.addEventListener('click', () => {
+        const currentTheme = document.documentElement.getAttribute('data-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        
+        document.documentElement.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+        themeIcon.textContent = newTheme === 'dark' ? '🌙' : '☀️';
+      });
+    }
+
+    // Initialize theme toggle on page load
+    document.addEventListener('DOMContentLoaded', initThemeToggle);
+  </script>
+  <script>
+let messages = [];
+let chatId = null;
+
+// Modify your existing sendMessage function
+async function sendMessage(message) {
+  if (!message.trim()) return;
+  messages.push({ role: "user", text: message });
+  addMessage(message, true);
+  document.getElementById('chatInput').value = '';
+  showTypingIndicator();
+
+  try {
+    const response = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message })
+    });
+    const data = await response.json();
+    hideTypingIndicator();
+    messages.push({ role: "ai", text: data.reply });
+    addMessage(data.reply || "Sorry, I couldn't process your request.");
+  } catch (err) {
+    console.error(err);
+    hideTypingIndicator();
+    addMessage("⚠️ Error contacting AI server.");
+  }
+}
+
+// Save chat
+async function saveChat() {
+  if (messages.length === 0) return alert("No messages to save.");
+  const response = await fetch('/api/chat/save', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ messages })
+  });
+  const data = await response.json();
+  if (data.chat_id) {
+    chatId = data.chat_id;
+    alert("✅ Chat saved successfully!");
+  } else {
+    alert("❌ Failed to save chat.");
+  }
+}
+
+// Download chat as PDF
+async function downloadChatPDF() {
+  try {
+    if (messages.length === 0) {
+      alert('No chat conversation to download yet.');
+      return;
+    }
+
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF();
+    
+    // Add title
+    pdf.setFontSize(20);
+    pdf.setTextColor(255, 59, 59);
+    pdf.text('AI Disaster Response Chat Session', 20, 30);
+    
+    // Add timestamp
+    pdf.setFontSize(12);
+    pdf.setTextColor(100, 100, 100);
+    pdf.text(`Generated: ${new Date().toLocaleString()}`, 20, 45);
+    
+    let yPos = 65;
+    const pageHeight = pdf.internal.pageSize.height;
+    const pageWidth = pdf.internal.pageSize.width;
+    const maxWidth = pageWidth - 40; // 20px margin on each side
+    
+    messages.forEach((message, index) => {
+      // Check if we need a new page
+      if (yPos > pageHeight - 40) {
+        pdf.addPage();
+        yPos = 30;
+      }
+      
+      // Set color and format based on sender
+      if (message.role === 'ai') {
+        pdf.setTextColor(59, 130, 246); // Blue for AI
+        pdf.setFontSize(12);
+        pdf.setFont(undefined, 'bold');
+        pdf.text('AI Assistant:', 20, yPos);
+        yPos += 8;
+        pdf.setFont(undefined, 'normal');
+      } else {
+        pdf.setTextColor(239, 68, 68); // Red for user
+        pdf.setFontSize(12);
+        pdf.setFont(undefined, 'bold');
+        pdf.text('You:', 20, yPos);
+        yPos += 8;
+        pdf.setFont(undefined, 'normal');
+      }
+      
+      // Clean the message text (remove HTML tags)
+      let cleanText = message.text
+        .replace(/<[^>]*>/g, '') // Remove HTML tags
+        .replace(/&nbsp;/g, ' ') // Replace &nbsp; with space
+        .replace(/&amp;/g, '&') // Replace &amp; with &
+        .replace(/&lt;/g, '<') // Replace &lt; with <
+        .replace(/&gt;/g, '>') // Replace &gt; with >
+        .trim();
+      
+      // Split long messages to fit page width
+      const splitText = pdf.splitTextToSize(cleanText, maxWidth - 20);
+      
+      // Add the message text
+      pdf.setTextColor(60, 60, 60); // Dark gray for message content
+      pdf.text(splitText, 30, yPos);
+      yPos += splitText.length * 6 + 15; // Add spacing between messages
+    });
+    
+    // Save the PDF
+    const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+    pdf.save(`ai_disaster_chat_${timestamp}.pdf`);
+    
+  } catch (e) {
+    console.error('Error generating chat PDF:', e);
+    alert('Failed to generate chat PDF. Please try again.');
+  }
+}
+
+// Delete chat
+async function deleteChat() {
+  if (!chatId) return alert("No saved chat found.");
+  const res = await fetch(`/api/chat/delete/${chatId}`, { method: 'DELETE' });
+  const result = await res.json();
+  alert(result.message || "Chat deleted.");
+  chatId = null;
+  messages = [];
+}
+</script>
+
+
+</body>
+</html>

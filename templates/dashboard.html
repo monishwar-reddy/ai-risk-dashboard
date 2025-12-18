@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Disaster Response — Risk Analysis Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <style>
+    .dashboard-container {
+      display: grid;
+      grid-template-columns: 1fr 400px;
+      gap: 2rem;
+      padding: 2rem;
+      min-height: calc(100vh - 80px);
+    }
+
+    .map-section {
+      background: var(--gradient-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.5rem;
+      position: relative;
+    }
+
+    #map {
+      height: 500px;
+      width: 100%;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+    }
+
+    .analysis-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .ai-chat-section {
+      background: var(--gradient-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.5rem;
+      height: 300px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      margin-bottom: 1rem;
+      padding: 0.5rem;
+      background: var(--bg-panel);
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+    }
+
+    .chat-input-container {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .chat-input {
+      flex: 1;
+      padding: 0.75rem;
+      background: var(--bg-panel);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      color: var(--text-primary);
+      font-size: 0.9rem;
+    }
+
+    .chat-message {
+      margin-bottom: 1rem;
+      padding: 0.75rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      line-height: 1.4;
+    }
+
+    .chat-message.user {
+      background: var(--primary-red);
+      color: white;
+      margin-left: 2rem;
+    }
+
+    .chat-message.ai {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      margin-right: 2rem;
+    }
+
+    .controls-section {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .control-btn {
+      padding: 0.5rem 1rem;
+      background: var(--bg-panel);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      color: var(--text-primary);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 0.9rem;
+    }
+
+    .control-btn:hover,
+    .control-btn.active {
+      background: var(--primary-red);
+      border-color: var(--primary-red);
+      color: white;
+    }
+
+    .panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 1rem;
+    }
+
+    .risk-low {
+      border-left: 4px solid #28a745;
+    }
+
+    .risk-medium {
+      border-left: 4px solid #ff8c1a;
+    }
+
+    .risk-high {
+      border-left: 4px solid #ff3b3b;
+    }
+
+    .loading {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid var(--primary-red);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    @media (max-width: 1024px) {
+      .dashboard-container {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+        padding: 1rem;
+      }
+
+      .ai-chat-section {
+        height: 250px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header class="header">
+    <div class="logo">🌋 AI Disaster Response</div>
+    <nav class="nav-links">
+      <a class="nav-link" href="/">Home</a>
+      <a class="nav-link" href="/chat">AI Chat</a>
+      <a class="nav-link" href="/contact">Contact</a>
+      <button id="themeToggle" class="theme-toggle" title="Toggle Theme">
+        <span class="theme-icon">🌙</span>
+      </button>
+    </nav>
+  </header>
+
+  <main class="dashboard-container">
+    <!-- Map Section -->
+    <div class="map-section">
+      <div class="controls-section">
+        <button class="control-btn active" id="roadmap-btn" onclick="setMapType('roadmap')">🗺️ Map</button>
+        <button class="control-btn" id="satellite-btn" onclick="setMapType('satellite')">🛰️ Satellite</button>
+        <button class="control-btn" id="terrain-btn" onclick="setMapType('terrain')">🏔️ Terrain</button>
+        <button class="control-btn" onclick="clearAnalysis()">🗑️ Clear</button>
+      </div>
+
+      <div id="map"></div>
+
+      <div id="riskPlotContainer"
+        style="margin-top: 1rem; background: var(--bg-card); padding: 1rem; border-radius: 8px; height: 300px;">
+        <h4 style="color: var(--primary-red); margin-bottom: 0.5rem;">📈 AI Risk Visualization</h4>
+        <div style="position: relative; height: 250px; width: 100%;">
+          <canvas id="riskPlot"></canvas>
+        </div>
+      </div>
+
+
+
+      <div class="mt-2 text-center">
+        <p class="text-secondary" style="font-size: 0.9rem;">
+          🎯 Click anywhere on the map to analyze disaster risk for that location
+        </p>
+      </div>
+    </div>
+
+    <!-- Analysis Panel -->
+    <div class="analysis-panel">
+      <!-- Risk Analysis Results -->
+      <div class="card" id="result">
+        <h3 style="margin-bottom: 1rem; color: var(--primary-red);">📊 Risk Analysis</h3>
+        <p class="text-secondary">Select a location on the map to get AI-powered risk assessment and safety
+          recommendations.</p>
+      </div>
+
+      <!-- AI Assistant Chat -->
+      <div class="ai-chat-section">
+        <h3 style="margin-bottom: 1rem; color: var(--primary-red);">🤖 AI Assistant</h3>
+        <div class="chat-messages" id="chatMessages">
+          <div class="chat-message ai">
+            <strong>AI Assistant:</strong> Hi! I'm here to help you understand disaster risks and provide safety
+            recommendations. Ask me anything about the analysis results or disaster preparedness!
+          </div>
+        </div>
+        <div class="chat-input-container">
+          <input type="text" class="chat-input" id="chatInput"
+            placeholder="Ask about disaster risks, safety tips, or analysis results..."
+            onkeypress="handleChatKeyPress(event)">
+          <button class="btn" onclick="sendChatMessage()" style="padding: 0.75rem 1rem;">Send</button>
+        </div>
+      </div>
+
+      <!-- Download/Delete Buttons -->
+      <div style="text-align: center; margin-top: 1rem;">
+        <button class="control-btn" onclick="downloadChatPDF()" style="margin-right: 0.5rem;">📄 Download Chat
+          PDF</button>
+        <button class="control-btn" onclick="deleteChat()">🗑️ Delete Chat</button>
+      </div>
+    </div>
+  </main>
+
+
+  <!-- Theme Toggle Script -->
+  <script>
+    function initThemeToggle() {
+      const themeToggle = document.getElementById('themeToggle');
+      const themeIcon = themeToggle.querySelector('.theme-icon');
+
+      const currentTheme = localStorage.getItem('theme') || 'dark';
+      document.documentElement.setAttribute('data-theme', currentTheme);
+      themeIcon.textContent = currentTheme === 'dark' ? '🌙' : '☀️';
+
+      themeToggle.addEventListener('click', () => {
+        const currentTheme = document.documentElement.getAttribute('data-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+        document.documentElement.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+        themeIcon.textContent = newTheme === 'dark' ? '🌙' : '☀️';
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', initThemeToggle);
+  </script>
+
+  <!-- Map & AI Logic -->
+  <script>
+    let map;
+    let marker;
+    let currentAnalysisData = null;
+    let riskChart = null;
+
+    function initMap() {
+      map = new google.maps.Map(document.getElementById("map"), {
+        center: { lat: 17.3850, lng: 78.4867 }, // Hyderabad
+        zoom: 6,
+        mapTypeId: 'roadmap',
+        styles: []
+      });
+
+      // Click handler for risk analysis
+      map.addListener("click", async (event) => {
+        const lat = event.latLng.lat();
+        const lng = event.latLng.lng();
+
+        // Remove previous marker
+        if (marker) marker.setMap(null);
+
+        // Add new marker with custom icon
+        marker = new google.maps.Marker({
+          position: { lat, lng },
+          map,
+          icon: {
+            url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+                <circle cx="16" cy="16" r="12" fill="#ff3b3b" stroke="white" stroke-width="2"/>
+                <text x="16" y="20" text-anchor="middle" fill="white" font-size="16">📍</text>
+              </svg>
+            `),
+            scaledSize: new google.maps.Size(32, 32)
+          }
+        });
+
+        await analyzeLocation(lat, lng);
+      });
+    }
+
+    async function analyzeLocation(lat, lng) {
+      const resultEl = document.getElementById("result");
+
+      // Show loading state
+      resultEl.innerHTML = `
+        <h3 style="margin-bottom: 1rem; color: var(--primary-red);">📊 Risk Analysis</h3>
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <div class="loading"></div>
+          <p>Analyzing risk for coordinates: (${lat.toFixed(4)}, ${lng.toFixed(4)})...</p>
+        </div>
+      `;
+
+      try {
+        const res = await fetch("/api/analyze", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ location: `${lat},${lng}` })
+        });
+
+        if (!res.ok) throw new Error("Network response not OK");
+
+        const data = await res.json();
+        currentAnalysisData = data;
+
+        const info = data.data || {};
+        const report = data.risk_report || {};
+
+        const level = (report.risk_level || "Unknown").toLowerCase();
+        let riskClass = "risk-low";
+        let riskColor = "#28a745";
+        let riskIcon = "🟢";
+
+        if (level.includes("medium")) {
+          riskClass = "risk-medium";
+          riskColor = "#ff8c1a";
+          riskIcon = "🟡";
+        } else if (level.includes("high")) {
+          riskClass = "risk-high";
+          riskColor = "#ff3b3b";
+          riskIcon = "🔴";
+        }
+
+        resultEl.innerHTML = `
+          <h3 style="margin-bottom: 1rem; color: var(--primary-red);">📊 Risk Analysis</h3>
+          <div class="panel ${riskClass}" style="margin-bottom: 1rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+              <h4 style="color: ${riskColor}; font-weight: 600; margin: 0;">${riskIcon} ${report.risk_level || "Unknown"} Risk</h4>
+              <span style="background: ${riskColor}; color: white; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.8rem; font-weight: 600;">
+                Score: ${report.risk_score || "N/A"}
+              </span>
+            </div>
+            <p style="font-size: 0.9rem; margin: 0;"><strong>📍 Location:</strong> ${data.location || `${lat.toFixed(4)}, ${lng.toFixed(4)}`}</p>
+          </div>
+          
+          <div class="panel" style="margin-bottom: 1rem;">
+            <h4 style="margin-bottom: 0.75rem; color: var(--text-primary);">🌡️ Environmental Data</h4>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; font-size: 0.9rem;">
+              <p><strong>Temperature:</strong> ${info.temperature ?? "N/A"}°C</p>
+              <p><strong>Humidity:</strong> ${info.humidity ?? "N/A"}%</p>
+              <p><strong>Rainfall:</strong> ${info.rainfall ?? "N/A"} mm</p>
+              <p><strong>Wind Speed:</strong> ${info.wind_speed ?? "N/A"} km/h</p>
+            </div>
+            <p style="margin-top: 0.5rem; font-size: 0.9rem;"><strong>🌍 Seismic Activity:</strong> ${info.earthquake_activity ?? "N/A"}</p>
+          </div>
+          
+          <div class="panel">
+            <h4 style="margin-bottom: 0.75rem; color: var(--text-primary);">💡 AI Recommendations</h4>
+            <p style="font-size: 0.9rem; line-height: 1.5;">${report.recommendation || "No specific recommendations available."}</p>
+          </div>
+          <div style="text-align:center; margin-top:1rem;">
+            <button id="downloadReportBtn" class="control-btn">📄 Download Risk PDF</button>
+          </div>
+        `;
+
+        // Create visualization plot
+        createRiskVisualization(info);
+
+        // Add AI message about the analysis
+        addAIMessage(`I've analyzed the location at (${lat.toFixed(4)}, ${lng.toFixed(4)}). The area shows ${report.risk_level?.toLowerCase() || 'unknown'} risk levels. ${report.recommendation ? 'Key recommendation: ' + report.recommendation.split('.')[0] + '.' : ''} Feel free to ask me any questions about this analysis!`);
+
+        // Attach download button click event
+        document.getElementById('downloadReportBtn').addEventListener('click', downloadReport);
+
+      } catch (err) {
+        console.error(err);
+        resultEl.innerHTML = `
+          <h3 style="margin-bottom: 1rem; color: var(--primary-red);">📊 Risk Analysis</h3>
+          <div class="panel" style="border-left: 4px solid #dc3545;">
+            <p style="color: #dc3545;">❌ Error connecting to analysis API. Please try again.</p>
+          </div>
+        `;
+      }
+    }
+
+    // Create risk visualization chart
+    function createRiskVisualization(info) {
+      const ctx = document.getElementById('riskPlot');
+      if (!ctx) return;
+
+      // Destroy existing chart if it exists
+      if (riskChart) {
+        riskChart.destroy();
+        riskChart = null;
+      }
+
+      // Prepare data for visualization with proper scaling
+      const labels = [];
+      const values = [];
+      const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57'];
+
+      // Add data with reasonable limits and scaling
+      if (info.temperature !== undefined && info.temperature !== null) {
+        labels.push('Temp (°C)');
+        let temp = parseFloat(info.temperature) || 0;
+        // Limit temperature to reasonable range
+        temp = Math.max(-50, Math.min(60, temp));
+        values.push(temp);
+      }
+
+      if (info.humidity !== undefined && info.humidity !== null) {
+        labels.push('Humidity (%)');
+        let humidity = parseFloat(info.humidity) || 0;
+        // Limit humidity to 0-100%
+        humidity = Math.max(0, Math.min(100, humidity));
+        values.push(humidity);
+      }
+
+      if (info.rainfall !== undefined && info.rainfall !== null) {
+        labels.push('Rain (mm)');
+        let rainfall = parseFloat(info.rainfall) || 0;
+        // Limit rainfall to reasonable range
+        rainfall = Math.max(0, Math.min(500, rainfall));
+        values.push(rainfall);
+      }
+
+      if (info.wind_speed !== undefined && info.wind_speed !== null) {
+        labels.push('Wind (km/h)');
+        let windSpeed = parseFloat(info.wind_speed) || 0;
+        // Limit wind speed to reasonable range
+        windSpeed = Math.max(0, Math.min(200, windSpeed));
+        values.push(windSpeed);
+      }
+
+      // Only create chart if we have data
+      if (labels.length === 0 || values.length === 0) {
+        ctx.getContext('2d').clearRect(0, 0, ctx.width, ctx.height);
+        return;
+      }
+
+      // Create new chart with fixed configuration
+      try {
+        riskChart = new Chart(ctx.getContext('2d'), {
+          type: 'bar',
+          data: {
+            labels: labels,
+            datasets: [{
+              label: 'Environmental Data',
+              data: values,
+              backgroundColor: colors.slice(0, values.length),
+              borderColor: colors.slice(0, values.length).map(color => color + 'CC'),
+              borderWidth: 1,
+              borderRadius: 6,
+              borderSkipped: false
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: {
+              duration: 800,
+              easing: 'easeOutQuart'
+            },
+            plugins: {
+              legend: {
+                display: false
+              },
+              tooltip: {
+                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                titleColor: 'white',
+                bodyColor: 'white',
+                borderColor: 'rgba(255, 255, 255, 0.2)',
+                borderWidth: 1
+              }
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                max: Math.max(...values) * 1.2, // Add 20% padding
+                grid: {
+                  color: 'rgba(255, 255, 255, 0.1)',
+                  drawBorder: false
+                },
+                ticks: {
+                  color: '#888',
+                  font: {
+                    size: 11
+                  },
+                  maxTicksLimit: 6
+                }
+              },
+              x: {
+                grid: {
+                  display: false
+                },
+                ticks: {
+                  color: '#888',
+                  font: {
+                    size: 11
+                  },
+                  maxRotation: 0
+                }
+              }
+            },
+            layout: {
+              padding: {
+                top: 10,
+                bottom: 10,
+                left: 10,
+                right: 10
+              }
+            }
+          }
+        });
+      } catch (error) {
+        console.error('Error creating chart:', error);
+      }
+    }
+
+    // Download report function as PDF
+    async function downloadReport() {
+      try {
+        if (!currentAnalysisData) {
+          alert("No analysis data available. Please analyze a location first.");
+          return;
+        }
+
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF();
+
+        // Add title
+        pdf.setFontSize(20);
+        pdf.setTextColor(255, 59, 59);
+        pdf.text('AI Disaster Risk Analysis Report', 20, 30);
+
+        // Add timestamp
+        pdf.setFontSize(12);
+        pdf.setTextColor(100, 100, 100);
+        pdf.text(`Generated: ${new Date().toLocaleString()}`, 20, 45);
+
+        const report = currentAnalysisData.risk_report || {};
+        const info = currentAnalysisData.data || {};
+
+        // Add risk level
+        pdf.setFontSize(16);
+        pdf.setTextColor(0, 0, 0);
+        pdf.text('Risk Assessment', 20, 65);
+
+        pdf.setFontSize(12);
+        pdf.text(`Risk Level: ${report.risk_level || 'Unknown'}`, 20, 80);
+        pdf.text(`Risk Score: ${report.risk_score || 'N/A'}`, 20, 95);
+        pdf.text(`Location: ${currentAnalysisData.location || 'Unknown'}`, 20, 110);
+
+        // Add environmental data
+        pdf.setFontSize(16);
+        pdf.text('Environmental Data', 20, 135);
+
+        pdf.setFontSize(12);
+        let yPos = 150;
+        pdf.text(`Temperature: ${info.temperature ?? 'N/A'}°C`, 20, yPos);
+        pdf.text(`Humidity: ${info.humidity ?? 'N/A'}%`, 20, yPos + 15);
+        pdf.text(`Rainfall: ${info.rainfall ?? 'N/A'} mm`, 20, yPos + 30);
+        pdf.text(`Wind Speed: ${info.wind_speed ?? 'N/A'} km/h`, 20, yPos + 45);
+        pdf.text(`Seismic Activity: ${info.earthquake_activity ?? 'N/A'}`, 20, yPos + 60);
+
+        // Add recommendations
+        pdf.setFontSize(16);
+        pdf.text('AI Recommendations', 20, yPos + 85);
+
+        pdf.setFontSize(12);
+        const recommendation = report.recommendation || 'No specific recommendations available.';
+        const splitRecommendation = pdf.splitTextToSize(recommendation, 170);
+        pdf.text(splitRecommendation, 20, yPos + 100);
+
+        // Add chart if available
+        if (riskChart) {
+          try {
+            const canvas = document.getElementById('riskPlot');
+            const chartImage = canvas.toDataURL('image/png');
+            pdf.addPage();
+            pdf.setFontSize(16);
+            pdf.text('Environmental Data Visualization', 20, 30);
+            pdf.addImage(chartImage, 'PNG', 20, 50, 170, 100);
+          } catch (chartError) {
+            console.warn('Could not add chart to PDF:', chartError);
+          }
+        }
+
+        // Save the PDF
+        pdf.save('disaster_risk_analysis_report.pdf');
+
+      } catch (err) {
+        console.error("Error generating PDF report:", err);
+        alert("Failed to generate PDF report. Please try again later.");
+      }
+    }
+
+    // Chat management functions
+    async function downloadChatPDF() {
+      try {
+        const chatMessages = document.getElementById('chatMessages');
+        const messages = chatMessages.querySelectorAll('.chat-message');
+
+        if (messages.length <= 1) { // Only initial message
+          alert('No chat conversation to download yet.');
+          return;
+        }
+
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF();
+
+        // Add title
+        pdf.setFontSize(20);
+        pdf.setTextColor(255, 59, 59);
+        pdf.text('AI Disaster Response Chat Session', 20, 30);
+
+        // Add timestamp
+        pdf.setFontSize(12);
+        pdf.setTextColor(100, 100, 100);
+        pdf.text(`Generated: ${new Date().toLocaleString()}`, 20, 45);
+
+        let yPos = 65;
+        const pageHeight = pdf.internal.pageSize.height;
+
+        messages.forEach((message, index) => {
+          if (yPos > pageHeight - 40) {
+            pdf.addPage();
+            yPos = 30;
+          }
+
+          const isAI = message.classList.contains('ai');
+          const messageText = message.textContent.trim();
+
+          // Set color and format based on sender
+          if (isAI) {
+            pdf.setTextColor(59, 130, 246); // Blue for AI
+            pdf.setFontSize(12);
+          } else {
+            pdf.setTextColor(239, 68, 68); // Red for user
+            pdf.setFontSize(12);
+          }
+
+          // Split long messages
+          const splitText = pdf.splitTextToSize(messageText, 170);
+          pdf.text(splitText, 20, yPos);
+          yPos += splitText.length * 6 + 10;
+        });
+
+        // Save the PDF
+        pdf.save('ai_chat_session.pdf');
+
+      } catch (e) {
+        console.error('Error generating chat PDF:', e);
+        alert('Failed to generate chat PDF. Please try again.');
+      }
+    }
+
+    async function deleteChat() {
+      if (confirm('Delete all chat messages?')) {
+        try {
+          await fetch('/api/chat/delete', { method: 'DELETE' });
+          document.getElementById('chatMessages').innerHTML = `<div class="chat-message ai"><strong>AI Assistant:</strong> Chat cleared! I'm ready to help you with new disaster risk analysis.</div>`;
+        } catch (e) {
+          console.error('Error deleting chat:', e);
+        }
+      }
+    }
+
+    // Map control functions
+    function setMapType(type) {
+      if (map) {
+        map.setMapTypeId(type);
+
+        // Update active button
+        document.querySelectorAll('.control-btn').forEach(btn => {
+          btn.classList.remove('active');
+        });
+
+        const buttonMap = {
+          'roadmap': 'roadmap-btn',
+          'satellite': 'satellite-btn',
+          'terrain': 'terrain-btn'
+        };
+
+        const activeButton = document.getElementById(buttonMap[type]);
+        if (activeButton) {
+          activeButton.classList.add('active');
+        }
+      }
+    }
+
+    function clearAnalysis() {
+      if (marker) {
+        marker.setMap(null);
+        marker = null;
+      }
+
+      currentAnalysisData = null;
+
+      // Clear the chart properly
+      if (riskChart) {
+        riskChart.destroy();
+        riskChart = null;
+      }
+
+      // Clear canvas
+      const canvas = document.getElementById('riskPlot');
+      if (canvas) {
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+
+      document.getElementById("result").innerHTML = `
+        <h3 style="margin-bottom: 1rem; color: var(--primary-red);">📊 Risk Analysis</h3>
+        <p class="text-secondary">Select a location on the map to get AI-powered risk assessment and safety recommendations.</p>
+      `;
+
+      addAIMessage("Analysis cleared! Click anywhere on the map to analyze a new location.");
+    }
+
+    // AI Chat Functions
+    function addAIMessage(message) {
+      const chatMessages = document.getElementById('chatMessages');
+      const messageDiv = document.createElement('div');
+      messageDiv.className = 'chat-message ai';
+      messageDiv.innerHTML = `<strong>AI Assistant:</strong> ${message}`;
+      chatMessages.appendChild(messageDiv);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function addUserMessage(message) {
+      const chatMessages = document.getElementById('chatMessages');
+      const messageDiv = document.createElement('div');
+      messageDiv.className = 'chat-message user';
+      messageDiv.innerHTML = `<strong>You:</strong> ${message}`;
+      chatMessages.appendChild(messageDiv);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    async function sendChatMessage() {
+      const chatInput = document.getElementById('chatInput');
+      const message = chatInput.value.trim();
+
+      if (!message) return;
+
+      addUserMessage(message);
+      chatInput.value = '';
+
+      // Show typing indicator
+      const typingDiv = document.createElement('div');
+      typingDiv.className = 'chat-message ai';
+      typingDiv.id = 'typing-indicator';
+      typingDiv.innerHTML = '<strong>AI Assistant:</strong> <div class="loading" style="display: inline-block; margin-left: 0.5rem;"></div> Thinking...';
+      document.getElementById('chatMessages').appendChild(typingDiv);
+      document.getElementById('chatMessages').scrollTop = document.getElementById('chatMessages').scrollHeight;
+
+      try {
+        let response = await generateAIResponse(message);
+
+        // Remove typing indicator
+        document.getElementById('typing-indicator').remove();
+
+        addAIMessage(response);
+
+      } catch (error) {
+        document.getElementById('typing-indicator').remove();
+        addAIMessage("I'm sorry, I'm having trouble processing your request right now. Please try again later.");
+      }
+    }
+
+    async function generateAIResponse(userMessage) {
+      const message = userMessage.toLowerCase();
+
+      if (message.includes('risk') || message.includes('danger')) {
+        if (currentAnalysisData) {
+          const report = currentAnalysisData.risk_report || {};
+          return `Based on the current analysis, the risk level is ${report.risk_level || 'unknown'}. ${report.recommendation || 'I recommend staying informed about local conditions and having an emergency plan ready.'}`;
+        }
+        return "To assess risk for a specific area, please click on a location on the map. I'll provide detailed risk analysis and safety recommendations based on real-time environmental data.";
+      }
+
+      if (message.includes('weather') || message.includes('temperature') || message.includes('climate')) {
+        if (currentAnalysisData) {
+          const info = currentAnalysisData.data || {};
+          return `Current weather conditions show: Temperature ${info.temperature || 'N/A'}°C, Humidity ${info.humidity || 'N/A'}%, Rainfall ${info.rainfall || 'N/A'}mm, Wind Speed ${info.wind_speed || 'N/A'}km/h. These factors are considered in the risk assessment.`;
+        }
+        return "I can provide weather information for any location you select on the map. The weather data includes temperature, humidity, rainfall, and wind speed - all important factors for disaster risk assessment.";
+      }
+
+      if (message.includes('earthquake') || message.includes('seismic')) {
+        if (currentAnalysisData) {
+          const info = currentAnalysisData.data || {};
+          return `Seismic activity for this location: ${info.earthquake_activity || 'No recent activity detected'}. Earthquake risk varies by geographic location and geological factors.`;
+        }
+        return "Earthquake risk depends on your location's seismic activity and geological factors. Select a location on the map to get specific seismic risk information for that area.";
+      }
+
+      if (message.includes('prepare') || message.includes('emergency') || message.includes('safety')) {
+        return "For disaster preparedness: 1) Create an emergency kit with water, food, and supplies for 72 hours, 2) Develop a family communication plan, 3) Know your evacuation routes, 4) Stay informed through official channels, 5) Practice emergency drills regularly. Would you like specific advice for any type of disaster?";
+      }
+
+      if (message.includes('help') || message.includes('how')) {
+        return "I can help you with: 🗺️ Understanding risk analysis results, 🌡️ Interpreting weather and environmental data, 🚨 Disaster preparedness tips, 📍 Location-specific safety recommendations. Just click anywhere on the map to start an analysis, or ask me any questions!";
+      }
+
+      const defaultResponses = [
+        "That's an interesting question! I'm here to help with disaster risk analysis and safety recommendations. Try clicking on the map to analyze a location, or ask me about emergency preparedness.",
+        "I specialize in disaster risk assessment and safety guidance. Feel free to ask about weather patterns, seismic activity, emergency preparedness, or any location-specific risks.",
+        "I'm designed to help you understand and prepare for potential disasters. You can ask me about risk levels, safety measures, or emergency planning. What would you like to know?"
+      ];
+
+      return defaultResponses[Math.floor(Math.random() * defaultResponses.length)];
+    }
+
+    function handleChatKeyPress(event) {
+      if (event.key === 'Enter') {
+        sendChatMessage();
+      }
+    }
+  </script>
+
+  <!-- Google Maps script -->
+  <script async
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB9YgIbF4bltjKnpoPcODlzHDgMZok4Hgg&callback=initMap">
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,271 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Contact Us — AI Disaster Response Platform</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css" />
+  <style>
+    .contact-container {
+      max-width: 800px;
+      margin: 2rem auto;
+      padding: 0 2rem;
+    }
+
+    .contact-header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    .contact-header h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      background: linear-gradient(135deg, #ffffff, #ff6b6b);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .contact-header p {
+      color: var(--text-secondary);
+      font-size: 1.1rem;
+      line-height: 1.6;
+    }
+
+    .contact-form-container {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .contact-form {
+      background: var(--gradient-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 2rem;
+    }
+
+    .info-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      padding: 1rem;
+      background: var(--bg-panel);
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+    }
+
+    .info-icon {
+      width: 40px;
+      height: 40px;
+      background: var(--gradient-primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+
+    .info-content h3 {
+      margin: 0 0 0.5rem 0;
+      font-size: 1.1rem;
+      color: var(--text-primary);
+    }
+
+    .info-content p {
+      margin: 0;
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group.full-width {
+      grid-column: 1 / -1;
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 1rem;
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+
+    .success-message {
+      background: linear-gradient(135deg, #28a745);
+      color: white;
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      text-align: center;
+      display: none;
+    }
+
+    @media (max-width: 768px) {
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+
+      .contact-container {
+        padding: 0 1rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header class="header">
+    <div class="logo">🌋 AI Disaster Response</div>
+    <nav class="nav-links">
+      <a class="nav-link" href="/menu">Portal</a>
+      <a class="nav-link" href="/dashboard">Dashboard</a>
+      <a class="nav-link" href="/">Home</a>
+      <button id="themeToggle" class="theme-toggle" title="Toggle Theme">
+        <span class="theme-icon">🌙</span>
+      </button>
+    </nav>
+  </header>
+
+  <div class="contact-container">
+    <div class="contact-header fade-in-up">
+      <h1>Get in Touch</h1>
+      <p>Have questions about our AI disaster response platform? Need technical support or want to collaborate? We're
+        here to help build safer communities together.</p>
+    </div>
+
+    <div class="contact-form-container">
+      <div class="contact-form fade-in-up">
+        <h2 style="margin-bottom: 1.5rem; color: var(--text-primary);">Send us a Message</h2>
+
+        <div class="success-message" id="successMessage">
+          ✅ Thank you! Your message has been sent successfully. We'll get back to you soon.
+        </div>
+
+        <form id="contactForm" action="https://formspree.io/f/mdkpwlqr" method="POST">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="name">Full Name *</label>
+              <input type="text" id="name" name="name" class="form-input" required>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="email">Email Address *</label>
+              <input type="email" id="email" name="email" class="form-input" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="subject">Subject</label>
+            <select id="subject" name="subject" class="form-input">
+              <option value="">Select a topic...</option>
+              <option value="Technical Support">Technical Support</option>
+              <option value="Feature Request">Feature Request</option>
+              <option value="Bug Report">Bug Report</option>
+              <option value="Partnership">Partnership Inquiry</option>
+              <option value="General Question">General Question</option>
+              <option value="Emergency Planning">Emergency Planning</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="message">Message *</label>
+            <textarea id="message" name="message" class="form-input form-textarea" rows="6"
+              placeholder="Tell us how we can help you..." required></textarea>
+          </div>
+
+          <button type="submit" class="btn submit-btn">
+            <span id="submitText">Send Message</span>
+            <span id="submitLoading" class="loading" style="display: none;"></span>
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function initThemeToggle() {
+      const themeToggle = document.getElementById('themeToggle');
+      const themeIcon = themeToggle.querySelector('.theme-icon');
+
+      // Check for saved theme or default to dark
+      const currentTheme = localStorage.getItem('theme') || 'dark';
+      document.documentElement.setAttribute('data-theme', currentTheme);
+      themeIcon.textContent = currentTheme === 'dark' ? '🌙' : '☀️';
+
+      themeToggle.addEventListener('click', () => {
+        const currentTheme = document.documentElement.getAttribute('data-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+        document.documentElement.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+        themeIcon.textContent = newTheme === 'dark' ? '🌙' : '☀️';
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initThemeToggle();
+
+      document.getElementById('contactForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        const submitBtn = this.querySelector('button[type="submit"]');
+        const submitText = document.getElementById('submitText');
+        const submitLoading = document.getElementById('submitLoading');
+        const successMessage = document.getElementById('successMessage');
+
+        // Show loading state
+        submitText.style.display = 'none';
+        submitLoading.style.display = 'inline-block';
+        submitBtn.disabled = true;
+
+        try {
+          const formData = new FormData(this);
+          const response = await fetch(this.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+              'Accept': 'application/json'
+            }
+          });
+
+          if (response.ok) {
+            // Show success message
+            successMessage.style.display = 'block';
+            this.reset();
+
+            // Scroll to success message
+            successMessage.scrollIntoView({ behavior: 'smooth' });
+
+            // Hide success message after 5 seconds
+            setTimeout(() => {
+              successMessage.style.display = 'none';
+            }, 5000);
+          } else {
+            throw new Error('Form submission failed');
+          }
+        } catch (error) {
+          alert('Sorry, there was an error sending your message. Please try again or contact us directly.');
+        } finally {
+          // Reset button state
+          submitText.style.display = 'inline';
+          submitLoading.style.display = 'none';
+          submitBtn.disabled = false;
+        }
+      });
+    });
+  </script>
+</body>
+
+</html>
