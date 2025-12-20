@@ -2,6 +2,12 @@
 
 A powerful AI-driven platform for real-time disaster risk analysis, emergency communication, and situational awareness. This application leverages Google's Gemini AI and OpenWeatherMap to provide actionable insights based on environmental data.
 
+try out link:
+
+## 🚀 Live Demo
+🔗 https://ai-risk-dashboard-192565971483.asia-south1.run.app
+
+
 ## 🚀 Features
 
 ### 🌍 Real-time Risk Analysis
