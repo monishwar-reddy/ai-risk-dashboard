@@ -6,6 +6,9 @@ import requests
 from flask import Flask, render_template, request, jsonify
 from flask_cors import CORS
 from google.cloud import storage
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = Flask(__name__, template_folder="templates", static_folder="static")
 CORS(app)
@@ -29,8 +32,8 @@ def static_files(filename):
     return app.send_static_file(filename)
 
 # CONFIG: set these as environment variables, do NOT hardcode keys in production
-OPENWEATHER_KEY = os.getenv("OPENWEATHER_KEY", "73c922d5b2cb1f79da6c54af102134be")
-GEMINI_KEY = os.getenv("GEMINI_KEY", "AIzaSyCgZjCjlq3DBhzXygVzBV2Kkp2imD4FTt8")
+OPENWEATHER_KEY = os.getenv("OPENWEATHER_KEY")
+GEMINI_KEY = os.getenv("GEMINI_KEY")
 GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={}".format(GEMINI_KEY)
 
 # Geocoding function to get location name
