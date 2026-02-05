@@ -5,7 +5,7 @@ A powerful AI-driven platform for real-time disaster risk analysis, emergency co
 try out link:
 
 ## 🚀 Live Demo
-🔗 https://ai-risk-dashboard-192565971483.asia-south1.run.app
+🔗 https://ai-disaster-system.netlify.app/
 
 
 ## 🚀 Features
